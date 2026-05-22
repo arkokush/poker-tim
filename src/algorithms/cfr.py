@@ -33,6 +33,11 @@ class CFR:
             return self.game.get_payoff(cards[:2], history, com_cards)
 
         actions = self.game.get_legal_actions(history)
+
+        # Forced transitions (e.g., round separator) — just recurse, no decision
+        if len(actions) == 1 and actions[0] not in ('F', 'P', 'C', 'B', 'R'):
+            return self.cfr(cards, history + actions[0], reach_p0, reach_p1)
+
         info_set_key = self.game.get_info_set_string(player_card, history, com_cards)
         info_set = self.get_info_set(info_set_key, len(actions))
 
