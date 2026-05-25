@@ -44,9 +44,14 @@ class LimitHoldem {
   _cardDisplay(id) {
     const r = this.ranks[this._cardRank(id)];
     const s = this._cardSuit(id);
+    const suitChar = this.suits[s];
+    const suitNames = { c: 'club', d: 'diamond', h: 'heart', s: 'spade' };
     return {
-      text: r + this.suitSymbols[this.suits[s]],
-      red: this.suitColors[this.suits[s]],
+      text: r + this.suitSymbols[suitChar],
+      rank: r,
+      suit: this.suitSymbols[suitChar],
+      suitName: suitNames[suitChar],
+      red: this.suitColors[suitChar],
     };
   }
 

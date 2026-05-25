@@ -9,6 +9,10 @@
 <body>
   <!-- Header -->
   <header>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
+      <span class="theme-toggle-icon" id="theme-icon">&#9790;</span>
+      <span id="theme-label">Light</span>
+    </button>
     <div class="header-content">
       <h1>PokerBot</h1>
       <p class="subtitle">Counterfactual Regret Minimization Strategy Explorer</p>
@@ -116,6 +120,26 @@
         <div id="game-mode-badge"></div>
       </div>
 
+      <!-- Playback Controls -->
+      <div id="playback-controls" class="hidden">
+        <div class="playback-bar">
+          <button class="btn-playback" id="btn-step" onclick="app.stepOnce()" title="Step one action">
+            <span class="icon">&#9199;</span> Step
+          </button>
+          <button class="btn-playback" id="btn-play" onclick="app.toggleAutoPlay()" title="Auto-play at slow pace">
+            <span class="icon" id="play-icon">&#9654;</span> <span id="play-label">Auto Play</span>
+          </button>
+          <button class="btn-playback btn-ff" id="btn-fastforward" onclick="app.fastForward()" title="Simulate 100 games instantly">
+            <span class="icon">&#9193;</span> Fast Forward 100
+          </button>
+        </div>
+        <div id="ff-stats" class="hidden">
+          <div class="ff-stats-inner">
+            <span id="ff-summary"></span>
+          </div>
+        </div>
+      </div>
+
       <!-- Score Board -->
       <div id="scoreboard">
         <div class="score-player">
@@ -143,7 +167,10 @@
         <!-- Community / Pot area -->
         <div id="community-area">
           <div class="card-row" id="community-cards"></div>
-          <div id="pot-display">Pot: <span id="pot-amount">0</span></div>
+          <div id="pot-zone">
+            <div id="pot-chips"></div>
+            <div id="pot-display">Pot: <span id="pot-amount">0</span></div>
+          </div>
         </div>
 
         <!-- Current player area -->
