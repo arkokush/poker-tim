@@ -23,10 +23,10 @@ const suitSymbol: Record<string, string> = {
 }
 
 const suitColor: Record<string, string> = {
-  h: '#EF4444',
-  d: '#EF4444',
-  c: '#F4F4F8',
-  s: '#F4F4F8',
+  h: '#DC2626',
+  d: '#EA580C',
+  c: '#16A34A',
+  s: '#1E293B',
 }
 
 export function CardComponent({ card, faceUp = true, index = 0, highlight, size = 'md' }: Props) {
@@ -56,7 +56,7 @@ export function CardComponent({ card, faceUp = true, index = 0, highlight, size 
         className={`w-full h-full rounded-lg overflow-hidden ${glowClass}`}
       >
         {faceUp && card ? (
-          <div className="w-full h-full bg-white rounded-lg flex flex-col items-center justify-center border border-gray-200 relative">
+          <div className="w-full h-full bg-white rounded-lg flex flex-col items-center justify-center border-2 border-gray-200 shadow-md relative">
             <span className={`font-mono font-bold ${s.text} leading-none`} style={{ color: suitColor[card.suit] }}>
               {card.rank}
             </span>

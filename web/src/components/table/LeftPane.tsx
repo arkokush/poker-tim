@@ -26,7 +26,7 @@ export function LeftPane({ players, handHistory }: Props) {
   }
 
   return (
-    <div className="w-[280px] flex flex-col gap-3 p-4 overflow-y-auto">
+    <div className="w-[280px] flex flex-col gap-3 p-4 overflow-y-auto border-r border-border-subtle">
       <p className="text-text-tertiary text-xs uppercase tracking-[0.18em] font-medium">Players</p>
 
       {players.map((player) => {

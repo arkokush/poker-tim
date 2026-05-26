@@ -4,6 +4,7 @@ import { CardComponent } from '../ui/CardComponent'
 import { ChipStack } from '../ui/ChipStack'
 import { ActionLabel } from '../ui/ActionLabel'
 import type { Player, PlayerAction } from '../../engines/types'
+import { Coins } from 'lucide-react'
 
 interface Props {
   player: Player
@@ -54,7 +55,7 @@ export const Seat = memo(function Seat({ player, isActive, isWinner, showCards, 
       <ActionLabel action={displayAction?.text ?? null} color={displayAction?.color ?? 'green'} />
 
       {/* Cards */}
-      <div className="flex gap-1">
+      <div className="flex gap-1.5">
         {player.holeCards.map((card, i) => (
           <CardComponent
             key={`${card.rank}${card.suit}-${i}`}
@@ -70,32 +71,35 @@ export const Seat = memo(function Seat({ player, isActive, isWinner, showCards, 
         )}
       </div>
 
-      {/* Avatar + Info */}
-      <div className="flex flex-col items-center gap-1">
+      {/* Avatar + Info + Stack */}
+      <div className="flex items-center gap-3">
         <motion.div
           animate={isActive ? { scale: [1, 1.08, 1] } : { scale: 1 }}
           transition={isActive ? { duration: 1.5, repeat: Infinity } : {}}
-          className={`w-14 h-14 rounded-full bg-bg-overlay border-2 flex items-center justify-center ${ringColor} transition-all`}
+          className={`w-12 h-12 rounded-full bg-bg-overlay border-2 flex items-center justify-center ${ringColor} transition-all shrink-0`}
         >
-          <span className="text-xl font-bold text-text-primary">
+          <span className="text-lg font-bold text-text-primary">
             {player.name.charAt(0).toUpperCase()}
           </span>
         </motion.div>
 
-        <div className="text-center">
-          <p className="text-text-primary text-sm font-medium leading-tight">{player.name}</p>
+        <div className="text-left min-w-0">
+          <p className="text-text-primary text-sm font-medium leading-tight truncate max-w-[120px]">{player.name}</p>
           <p className={`text-xs font-medium ${player.isBot ? 'text-text-tertiary' : 'text-accent-purple'}`}>
             {player.isBot ? player.botStrategy?.toUpperCase() ?? 'BOT' : 'PLAYER'}
           </p>
         </div>
 
-        {/* Stack */}
-        <p className="font-mono text-sm font-semibold text-text-primary tabular-nums">
-          {player.stack}
-        </p>
+        {/* Chip stack display */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-overlay/60 border border-border-subtle">
+          <Coins className="w-3.5 h-3.5 text-accent-purple" />
+          <span className="font-mono text-sm font-semibold text-text-primary tabular-nums">
+            {player.stack}
+          </span>
+        </div>
       </div>
 
-      {/* Bet */}
+      {/* Current bet */}
       {player.currentBet > 0 && (
         <ChipStack
           amount={player.currentBet}

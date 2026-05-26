@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useUIStore } from '../stores/uiStore'
 import { useGameStore } from '../stores/gameStore'
-import { ArrowLeft, User, Bot } from 'lucide-react'
+import { ArrowLeft, User, Bot, Sun, Moon } from 'lucide-react'
 import type { GameConfig, Player } from '../engines/types'
 
 const variantDefaults: Record<string, { smallBlind: number; bigBlind: number; startingStack: number }> = {
@@ -15,13 +15,12 @@ const variantDefaults: Record<string, { smallBlind: number; bigBlind: number; st
 const botOptions = [
   { value: 'random', label: 'Random', desc: 'Picks actions uniformly at random' },
   { value: 'always_call', label: 'Always Call', desc: 'Never folds, never raises' },
-  { value: 'aggressive', label: 'Aggressive', desc: 'Raises 70%, calls 25%, folds 5%' },
-  { value: 'tight', label: 'Tight-Passive', desc: 'Folds often, rarely bets' },
+  { value: 'mccfr', label: 'MCCFR', desc: 'Pre-trained Monte Carlo CFR strategy' },
 ]
 
 export function Setup() {
   const navigate = useNavigate()
-  const { selectedVariant, selectedMode } = useUIStore()
+  const { selectedVariant, selectedMode, lightMode, toggleLightMode } = useUIStore()
   const startSession = useGameStore((s) => s.startSession)
 
   const defaults = variantDefaults[selectedVariant || 'kuhn']
@@ -70,7 +69,16 @@ export function Setup() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-12 px-6">
+    <div className="min-h-screen flex flex-col items-center py-12 px-6 relative">
+      {/* Light mode toggle */}
+      <button
+        onClick={toggleLightMode}
+        className="absolute top-4 right-4 z-20 p-2 rounded-lg hover:bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+        title={lightMode ? 'Switch to dark mode' : 'Switch to light mode'}
+      >
+        {lightMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+      </button>
+
       <div className="w-full max-w-2xl">
         {/* Header */}
         <motion.div

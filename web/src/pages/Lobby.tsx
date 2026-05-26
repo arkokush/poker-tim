@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useUIStore } from '../stores/uiStore'
 import type { GameVariant, PlayMode } from '../engines/types'
-import { Spade, Users, Bot, Eye } from 'lucide-react'
+import { Spade, Users, Bot, Eye, Sun, Moon } from 'lucide-react'
 
 const variants: { id: GameVariant; name: string; description: string; cards: string }[] = [
   {
@@ -33,12 +33,21 @@ const modes: { id: PlayMode; name: string; icon: typeof Users; description: stri
 
 export function Lobby() {
   const navigate = useNavigate()
-  const { selectedVariant, selectedMode, setVariant, setMode } = useUIStore()
+  const { selectedVariant, selectedMode, setVariant, setMode, lightMode, toggleLightMode } = useUIStore()
 
   const canStart = selectedVariant && selectedMode
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Light mode toggle */}
+      <button
+        onClick={toggleLightMode}
+        className="absolute top-4 right-4 z-20 p-2 rounded-lg hover:bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+        title={lightMode ? 'Switch to dark mode' : 'Switch to light mode'}
+      >
+        {lightMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+      </button>
+
       {/* Animated gradient background */}
       <div
         className="absolute inset-0 opacity-30"

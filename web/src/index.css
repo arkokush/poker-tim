@@ -40,12 +40,45 @@ body {
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* ---- Light Mode ---- */
+.light {
+  --color-bg-base: #F8F6F2;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-overlay: #F0EDE8;
+  --color-surface-glass: rgba(255, 255, 255, 0.85);
+
+  --color-felt-deep: #2D6B4A;
+  --color-felt-mid: #3A8C62;
+  --color-felt-edge: #4CA675;
+
+  --color-accent-purple: #DC2626;
+  --color-accent-purple-glow: rgba(220, 38, 38, 0.30);
+  --color-accent-green: #16A34A;
+  --color-accent-green-glow: rgba(22, 163, 74, 0.30);
+  --color-accent-red: #DC2626;
+  --color-accent-red-glow: rgba(220, 38, 38, 0.30);
+
+  --color-text-primary: #1C1917;
+  --color-text-secondary: #57534E;
+  --color-text-tertiary: #A8A29E;
+
+  --color-border-subtle: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(220, 38, 38, 0.25);
+}
+
+.light body,
+body.light {
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
 }
 
 @media (prefers-reduced-motion: reduce) {
