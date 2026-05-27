@@ -74,11 +74,11 @@ export function Lobby() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Spade className="w-10 h-10 text-accent-purple" />
             <h1 className="font-display text-5xl font-bold tracking-tight text-text-primary">
-              PokerBot
+              Meet Poker <span className="text-accent-purple">T.I.M.</span>
             </h1>
           </div>
           <p className="text-text-secondary text-lg">
-            Head-to-head poker simulation & strategy research
+            Trained Intelligence Model — head-to-head poker simulation & strategy research
           </p>
         </motion.div>
 
