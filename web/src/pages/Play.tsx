@@ -80,6 +80,7 @@ export function Play() {
   }, [session?.state?.handNumber, session?.state?.actionHistory.length, session?.mode])
 
   // Auto-act for bots in PvB mode
+  // Depend on actionHistory length + street so we re-fire even if currentPlayerIndex doesn't change across streets
   useEffect(() => {
     if (!session?.state || session.state.isHandOver) return
     if (session.mode === 'pvb' || session.mode === 'pvp') {
@@ -89,7 +90,7 @@ export function Play() {
         return () => clearTimeout(timer)
       }
     }
-  }, [session?.state?.currentPlayerIndex, session?.state?.isHandOver, session?.mode, botAct])
+  }, [session?.state?.currentPlayerIndex, session?.state?.isHandOver, session?.state?.actionHistory.length, session?.state?.street, session?.mode, botAct])
 
   // Auto-deal next hand after a pause
   useEffect(() => {
@@ -230,7 +231,7 @@ export function Play() {
       {/* Main layout */}
       <div className="flex flex-1 min-h-0">
         {/* Left Pane */}
-        <LeftPane players={state.players} handHistory={session.handHistory} />
+        <LeftPane players={state.players} handHistory={session.handHistory} config={session.config} />
 
         {/* Center */}
         <div className="flex-1 flex flex-col min-h-0 relative">
@@ -328,7 +329,7 @@ export function Play() {
         </div>
 
         {/* Right Pane */}
-        <RightPane handHistory={session.handHistory} players={state.players} />
+        <RightPane handHistory={session.handHistory} players={state.players} config={session.config} />
       </div>
     </div>
   )

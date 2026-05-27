@@ -10,6 +10,8 @@ interface HandRecord {
   actions: GameState['actionHistory']
   players: { id: number; name: string; stack: number; holeCards: Player['holeCards'] }[]
   communityCards: GameState['communityCards']
+  /** Net chips gained/lost per player this hand (index by player id) */
+  netByPlayer: Record<number, number>
 }
 
 interface GameSession {
@@ -21,6 +23,8 @@ interface GameSession {
   isRunning: boolean
   bvbSpeed: number // 0.5, 1, 2, 4, or 0 for instant
   bvbInterval: ReturnType<typeof setTimeout> | null
+  /** Stacks at the start of the current hand, used to compute per-hand net */
+  preHandStacks: Record<number, number>
 }
 
 interface GameStore {
@@ -44,6 +48,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const engine = getEngine(config.variant)
     const state = engine.createInitialState(config, players)
     const id = crypto.randomUUID()
+    const preHandStacks: Record<number, number> = {}
+    state.players.forEach((p) => { preHandStacks[p.id] = p.stack })
+
     set({
       session: {
         id,
@@ -54,6 +61,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         isRunning: false,
         bvbSpeed: 1,
         bvbInterval: null,
+        preHandStacks,
       },
     })
   },
@@ -62,9 +70,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { session } = get()
     if (!session || !session.state) return
     const engine = getEngine(session.config.variant)
-    const newState = engine.dealNewHand(session.state)
+
+    // If infinite stack, reset both players' stacks before dealing
+    let stateForDeal = session.state
+    if (session.config.infiniteStack) {
+      stateForDeal = {
+        ...stateForDeal,
+        players: stateForDeal.players.map((p) => ({
+          ...p,
+          stack: session.config.startingStack,
+        })),
+      }
+    }
+
+    // Snapshot stacks before blinds are posted
+    const preHandStacks: Record<number, number> = {}
+    stateForDeal.players.forEach((p) => { preHandStacks[p.id] = p.stack })
+
+    const newState = engine.dealNewHand(stateForDeal)
     set({
-      session: { ...session, state: newState },
+      session: { ...session, state: newState, preHandStacks },
     })
   },
 
@@ -76,6 +101,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     let handHistory = session.handHistory
     if (newState.isHandOver) {
+      const netByPlayer: Record<number, number> = {}
+      newState.players.forEach((p) => {
+        netByPlayer[p.id] = p.stack - (session.preHandStacks[p.id] ?? session.config.startingStack)
+      })
+
       handHistory = [
         ...handHistory,
         {
@@ -90,6 +120,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             holeCards: [...p.holeCards],
           })),
           communityCards: [...newState.communityCards],
+          netByPlayer,
         },
       ]
     }
@@ -141,7 +172,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const engine = getEngine(session.config.variant)
 
     let state = session.state
+    let preHandStacks = session.preHandStacks
     if (state.isHandOver) {
+      // If infinite stack, reset stacks before dealing
+      if (session.config.infiniteStack) {
+        state = {
+          ...state,
+          players: state.players.map((p) => ({
+            ...p,
+            stack: session.config.startingStack,
+          })),
+        }
+      }
+      // Snapshot stacks before dealing
+      preHandStacks = {}
+      state.players.forEach((p) => { preHandStacks[p.id] = p.stack })
       state = engine.dealNewHand(state)
     }
 
@@ -156,26 +201,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    const handHistory = state.isHandOver
-      ? [
-          ...session.handHistory,
-          {
-            handNumber: state.handNumber,
-            winner: state.winner,
-            winAmount: state.winAmount,
-            actions: state.actionHistory,
-            players: state.players.map((p) => ({
-              id: p.id,
-              name: p.name,
-              stack: p.stack,
-              holeCards: [...p.holeCards],
-            })),
-            communityCards: [...state.communityCards],
-          },
-        ]
-      : session.handHistory
+    let handHistory = session.handHistory
+    if (state.isHandOver) {
+      const netByPlayer: Record<number, number> = {}
+      state.players.forEach((p) => {
+        netByPlayer[p.id] = p.stack - (preHandStacks[p.id] ?? session.config.startingStack)
+      })
 
-    set({ session: { ...session, state, handHistory } })
+      handHistory = [
+        ...handHistory,
+        {
+          handNumber: state.handNumber,
+          winner: state.winner,
+          winAmount: state.winAmount,
+          actions: state.actionHistory,
+          players: state.players.map((p) => ({
+            id: p.id,
+            name: p.name,
+            stack: p.stack,
+            holeCards: [...p.holeCards],
+          })),
+          communityCards: [...state.communityCards],
+          netByPlayer,
+        },
+      ]
+    }
+
+    set({ session: { ...session, state, handHistory, preHandStacks } })
   },
 
   toggleRunning: () => {

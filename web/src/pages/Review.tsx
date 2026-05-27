@@ -29,11 +29,39 @@ export function Review() {
   const p2Wins = handHistory.filter((h) => h.winner === 1).length
   const totalHands = handHistory.length
 
-  const stackOverTime = handHistory.map((h) => ({
-    hand: h.handNumber,
-    [players[0]?.name ?? 'P1']: h.players[0]?.stack ?? 0,
-    [players[1]?.name ?? 'P2']: h.players[1]?.stack ?? 0,
-  }))
+  // Compute profit over time
+  const getProfit = (playerId: number) => {
+    if (config.infiniteStack) {
+      return handHistory.reduce((sum, h) => sum + (h.netByPlayer?.[playerId] ?? 0), 0)
+    }
+    const player = players.find((p) => p.id === playerId)
+    return player ? player.stack - config.startingStack : 0
+  }
+
+  const p1Profit = getProfit(0)
+  const p2Profit = getProfit(1)
+
+  const chartData = (() => {
+    if (config.infiniteStack) {
+      // Cumulative net chips over time
+      let cum0 = 0
+      let cum1 = 0
+      return handHistory.map((h) => {
+        cum0 += h.netByPlayer?.[0] ?? 0
+        cum1 += h.netByPlayer?.[1] ?? 0
+        return {
+          hand: h.handNumber,
+          [players[0]?.name ?? 'P1']: cum0,
+          [players[1]?.name ?? 'P2']: cum1,
+        }
+      })
+    }
+    return handHistory.map((h) => ({
+      hand: h.handNumber,
+      [players[0]?.name ?? 'P1']: h.players[0]?.stack ?? 0,
+      [players[1]?.name ?? 'P2']: h.players[1]?.stack ?? 0,
+    }))
+  })()
 
   const actionCounts = players.map((p) => {
     const counts: Record<string, number> = { fold: 0, check: 0, call: 0, bet: 0, raise: 0 }
@@ -51,7 +79,7 @@ export function Review() {
   ]
   const PIE_COLORS = ['#8B5CF6', '#22C55E']
 
-  const overallWinner = p1Wins > p2Wins ? players[0] : p2Wins > p1Wins ? players[1] : null
+  const overallWinner = p1Profit > p2Profit ? players[0] : p2Profit > p1Profit ? players[1] : null
 
   return (
     <div className="min-h-screen flex flex-col py-8 px-6">
@@ -81,6 +109,7 @@ export function Review() {
               <p className="font-display text-lg font-bold text-text-primary">{overallWinner.name} wins the match</p>
               <p className="text-text-secondary text-sm">
                 {p1Wins > p2Wins ? p1Wins : p2Wins} - {p1Wins > p2Wins ? p2Wins : p1Wins} hands
+                {' \u00B7 '}Profit: {p1Profit > p2Profit ? `+${p1Profit}` : `+${p2Profit}`}
               </p>
             </div>
           </div>
@@ -90,9 +119,9 @@ export function Review() {
         <div className="grid grid-cols-2 gap-6 mb-8">
           {/* Stack over time */}
           <div className="p-5 rounded-xl bg-bg-elevated border border-border-subtle" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
-            <p className="text-text-tertiary text-xs uppercase tracking-[0.18em] font-medium mb-4">Stack Over Time</p>
+            <p className="text-text-tertiary text-xs uppercase tracking-[0.18em] font-medium mb-4">{config.infiniteStack ? 'Profit Over Time' : 'Stack Over Time'}</p>
             <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={stackOverTime}>
+              <LineChart data={chartData}>
                 <XAxis dataKey="hand" tick={{ fontSize: 10, fill: '#5C5C70' }} />
                 <YAxis tick={{ fontSize: 10, fill: '#5C5C70' }} />
                 <Tooltip contentStyle={{ background: '#14141E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, fontSize: 12 }} />

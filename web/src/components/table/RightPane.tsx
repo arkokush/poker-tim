@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts'
-import type { Player, PlayerAction, Card } from '../../engines/types'
+import type { Player, PlayerAction, Card, GameConfig } from '../../engines/types'
 
 interface HandRecord {
   handNumber: number
@@ -10,11 +10,13 @@ interface HandRecord {
   actions: { playerIndex: number; action: PlayerAction; street: string }[]
   players: { id: number; name: string; stack: number; holeCards: Card[] }[]
   communityCards: Card[]
+  netByPlayer: Record<number, number>
 }
 
 interface Props {
   handHistory: HandRecord[]
   players: Player[]
+  config: GameConfig
 }
 
 function cardStr(c: Card): string {
@@ -35,16 +37,31 @@ function actionStr(a: { playerIndex: number; action: PlayerAction }): string {
 
 type StatsTab = 'overview' | 'actions'
 
-export function RightPane({ handHistory, players }: Props) {
+export function RightPane({ handHistory, players, config }: Props) {
   const [expandedHand, setExpandedHand] = useState<number | null>(null)
   const [activeTab, setActiveTab] = useState<StatsTab>('overview')
 
-  // Stack over time data
-  const stackData = handHistory.map((h) => ({
-    hand: h.handNumber,
-    [players[0]?.name ?? 'P1']: h.players[0]?.stack ?? 0,
-    [players[1]?.name ?? 'P2']: h.players[1]?.stack ?? 0,
-  }))
+  // Stack/profit over time data
+  const stackData = (() => {
+    if (config.infiniteStack) {
+      let cum0 = 0
+      let cum1 = 0
+      return handHistory.map((h) => {
+        cum0 += h.netByPlayer?.[0] ?? 0
+        cum1 += h.netByPlayer?.[1] ?? 0
+        return {
+          hand: h.handNumber,
+          [players[0]?.name ?? 'P1']: cum0,
+          [players[1]?.name ?? 'P2']: cum1,
+        }
+      })
+    }
+    return handHistory.map((h) => ({
+      hand: h.handNumber,
+      [players[0]?.name ?? 'P1']: h.players[0]?.stack ?? 0,
+      [players[1]?.name ?? 'P2']: h.players[1]?.stack ?? 0,
+    }))
+  })()
 
   // Action distribution
   const actionDist = players.map((p) => {

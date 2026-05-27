@@ -24,7 +24,7 @@ const suitSymbol: Record<string, string> = {
 
 const suitColor: Record<string, string> = {
   h: '#DC2626',
-  d: '#EA580C',
+  d: '#D97706',
   c: '#16A34A',
   s: '#1E293B',
 }

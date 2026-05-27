@@ -55,6 +55,7 @@ export interface GameConfig {
   bigBlind: number
   handLimit: number
   seed?: number
+  infiniteStack?: boolean
 }
 
 export interface GameEngine {

@@ -34,6 +34,7 @@ export function Setup() {
   const [smallBlind, setSmallBlind] = useState(defaults.smallBlind)
   const [bigBlind, setBigBlind] = useState(defaults.bigBlind)
   const [seed, setSeed] = useState('')
+  const [infiniteStack, setInfiniteStack] = useState(false)
 
   if (!selectedVariant || !selectedMode) {
     navigate('/')
@@ -54,6 +55,7 @@ export function Setup() {
       bigBlind,
       handLimit,
       seed: seed ? parseInt(seed, 10) : undefined,
+      infiniteStack,
     }
 
     const players: Pick<Player, 'id' | 'name' | 'isBot' | 'botStrategy'>[] = [
@@ -205,8 +207,18 @@ export function Setup() {
                 type="number"
                 value={startingStack}
                 onChange={(e) => setStartingStack(Number(e.target.value))}
-                className="w-full bg-bg-overlay border border-border-subtle rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent-purple"
+                disabled={infiniteStack}
+                className={`w-full bg-bg-overlay border border-border-subtle rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent-purple ${infiniteStack ? 'opacity-40' : ''}`}
               />
+              <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={infiniteStack}
+                  onChange={(e) => setInfiniteStack(e.target.checked)}
+                  className="accent-accent-purple w-3.5 h-3.5 cursor-pointer"
+                />
+                <span className="text-text-secondary text-xs">Infinite stack</span>
+              </label>
             </div>
             <div>
               <label className="text-text-secondary text-sm block mb-2">Blinds</label>

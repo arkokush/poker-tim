@@ -1,17 +1,19 @@
-import { User, Bot, TrendingUp, TrendingDown } from 'lucide-react'
-import type { Player } from '../../engines/types'
+import { User, Bot, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import type { Player, GameConfig } from '../../engines/types'
 
 interface HandRecord {
   winner: number | null
   winAmount: number
+  netByPlayer: Record<number, number>
 }
 
 interface Props {
   players: Player[]
   handHistory: HandRecord[]
+  config: GameConfig
 }
 
-export function LeftPane({ players, handHistory }: Props) {
+export function LeftPane({ players, handHistory, config }: Props) {
   const getWinRate = (playerId: number) => {
     if (handHistory.length === 0) return 0
     const wins = handHistory.filter((h) => h.winner === playerId).length
@@ -19,10 +21,14 @@ export function LeftPane({ players, handHistory }: Props) {
   }
 
   const getProfit = (playerId: number) => {
-    return handHistory.reduce((sum, h) => {
-      if (h.winner === playerId) return sum + h.winAmount
-      return sum
-    }, 0)
+    if (config.infiniteStack) {
+      // Infinite stack: sum of net chips per hand
+      return handHistory.reduce((sum, h) => sum + (h.netByPlayer[playerId] ?? 0), 0)
+    }
+    // Normal: current stack - starting stack
+    const player = players.find((p) => p.id === playerId)
+    if (!player) return 0
+    return player.stack - config.startingStack
   }
 
   return (
@@ -32,7 +38,8 @@ export function LeftPane({ players, handHistory }: Props) {
       {players.map((player) => {
         const winRate = getWinRate(player.id)
         const profit = getProfit(player.id)
-        const isPositive = profit >= 0
+        const isPositive = profit > 0
+        const isNeutral = profit === 0
 
         return (
           <div
@@ -59,20 +66,22 @@ export function LeftPane({ players, handHistory }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-text-tertiary text-xs mb-0.5">Win Rate</p>
-                <p className={`font-mono text-sm font-semibold ${winRate >= 50 ? 'text-accent-green' : 'text-accent-red'}`}>
+                <p className={`font-mono text-sm font-semibold ${winRate >= 50 ? 'text-accent-green' : winRate === 0 && handHistory.length === 0 ? 'text-text-secondary' : 'text-accent-red'}`}>
                   {winRate}%
                 </p>
               </div>
               <div>
                 <p className="text-text-tertiary text-xs mb-0.5">Profit</p>
-                <p className={`font-mono text-sm font-semibold flex items-center gap-1 ${isPositive ? 'text-accent-green' : 'text-accent-red'}`}>
-                  {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                <p className={`font-mono text-sm font-semibold flex items-center gap-1 ${isNeutral ? 'text-text-secondary' : isPositive ? 'text-accent-green' : 'text-accent-red'}`}>
+                  {isNeutral ? <Minus className="w-3 h-3" /> : isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {isPositive ? '+' : ''}{profit}
                 </p>
               </div>
               <div>
                 <p className="text-text-tertiary text-xs mb-0.5">Stack</p>
-                <p className="font-mono text-sm font-semibold text-text-primary tabular-nums">{player.stack}</p>
+                <p className="font-mono text-sm font-semibold text-text-primary tabular-nums">
+                  {config.infiniteStack ? '\u221E' : player.stack}
+                </p>
               </div>
               <div>
                 <p className="text-text-tertiary text-xs mb-0.5">Hands</p>
