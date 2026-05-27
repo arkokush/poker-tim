@@ -97,7 +97,8 @@ export function Play() {
     if (!session?.state || !session.state.isHandOver) return
     if (session.mode === 'pvp' || session.mode === 'pvb') {
       const handNum = session.state.handNumber
-      if (handNum < session.config.handLimit) {
+      const bankrupt = !session.config.infiniteStack && session.state.players.some((p) => p.stack <= 0)
+      if (handNum < session.config.handLimit && !bankrupt) {
         const timer = setTimeout(() => dealHand(), 2500)
         return () => clearTimeout(timer)
       }
@@ -113,7 +114,8 @@ export function Play() {
       bvbTimerRef.current = setInterval(() => {
         const s = useGameStore.getState().session
         if (!s || !s.state) return
-        if (s.state.handNumber >= s.config.handLimit) {
+        const bankrupt = !s.config.infiniteStack && s.state.players.some((p) => p.stack <= 0)
+        if (s.state.handNumber >= s.config.handLimit || (bankrupt && s.state.isHandOver)) {
           toggleRunning()
           return
         }
@@ -132,7 +134,9 @@ export function Play() {
         for (let i = 0; i < batchSize; i++) {
           useGameStore.getState().stepOneHand()
           const s = useGameStore.getState().session
-          if (!s || s.state!.handNumber >= s.config.handLimit) {
+          if (!s) return
+          const bankrupt = !s.config.infiniteStack && s.state!.players.some((p) => p.stack <= 0)
+          if (s.state!.handNumber >= s.config.handLimit || bankrupt) {
             toggleRunning()
             return
           }
@@ -186,7 +190,8 @@ export function Play() {
   const state = session.state
   const variantLabel = session.config.variant === 'kuhn' ? 'Kuhn' : session.config.variant === 'leduc' ? 'Leduc' : 'Limit HE'
   const modeLabel = session.mode.toUpperCase()
-  const isMatchOver = state.handNumber >= session.config.handLimit && state.isHandOver
+  const isBankrupt = !session.config.infiniteStack && state.players.some((p) => p.stack <= 0)
+  const isMatchOver = state.isHandOver && (state.handNumber >= session.config.handLimit || isBankrupt)
   const currentPlayerName = state.players[state.currentPlayerIndex]?.name ?? 'Player'
 
   return (

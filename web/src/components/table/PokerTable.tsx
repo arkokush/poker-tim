@@ -69,37 +69,46 @@ export function PokerTable({ state, lastActions, mode, pvpActivePlayer }: Props)
           )}
         </div>
 
-        {/* Community cards + pot — centered */}
-        <div className="flex flex-col items-center justify-center gap-2.5 py-2">
-          {/* Street label */}
-          {showStreetLabel && (
-            <motion.div
-              key={street}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="px-3 py-0.5 rounded-full bg-bg-overlay/80 border border-border-subtle text-text-secondary text-xs font-medium"
-            >
-              {streetLabels[street] || street}
-            </motion.div>
-          )}
+        {/* Community cards + pot — centered, fixed layout */}
+        <div className="flex flex-col items-center justify-center shrink-0">
+          {/* Street label — fixed height slot */}
+          <div className="h-7 flex items-center justify-center">
+            {showStreetLabel && (
+              <motion.div
+                key={street}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="px-3 py-0.5 rounded-full bg-bg-overlay/80 border border-border-subtle text-text-secondary text-xs font-medium"
+              >
+                {streetLabels[street] || street}
+              </motion.div>
+            )}
+          </div>
 
-          {/* Community cards */}
-          {maxCommunitySlots > 0 && (
-            <div className="flex gap-2 justify-center">
-              {communityCards.map((card, i) => (
-                <CardComponent key={`${card.rank}${card.suit}`} card={card} faceUp index={i} size="md" />
-              ))}
-              {Array.from({ length: maxCommunitySlots - communityCards.length }).map((_, i) => (
-                <div
-                  key={`empty-${i}`}
-                  className="w-14 h-20 rounded-lg border border-border-subtle/30 bg-white/5"
-                />
-              ))}
-            </div>
-          )}
+          {/* Community cards — fixed height slot */}
+          <div className="h-24 flex items-center justify-center">
+            {maxCommunitySlots > 0 && (
+              <div className="flex gap-2 justify-center">
+                {communityCards.map((card, i) => (
+                  <CardComponent key={`${card.rank}${card.suit}`} card={card} faceUp index={i} size="md" />
+                ))}
+                {Array.from({ length: maxCommunitySlots - communityCards.length }).map((_, i) => (
+                  <div
+                    key={`empty-${i}`}
+                    className="w-14 h-20 rounded-lg border border-border-subtle/30 bg-white/5"
+                  />
+                ))}
+              </div>
+            )}
+            {variant === 'kuhn' && (
+              <div className="text-text-tertiary/20 font-display text-3xl font-bold uppercase tracking-wider select-none">
+                KUHN
+              </div>
+            )}
+          </div>
 
-          {/* Pot */}
-          <div className="min-h-[32px] flex items-center justify-center">
+          {/* Pot — fixed height slot */}
+          <div className="h-10 flex items-center justify-center">
             {pot > 0 && (
               <motion.div
                 className="flex items-center gap-2"
@@ -112,13 +121,6 @@ export function PokerTable({ state, lastActions, mode, pvpActivePlayer }: Props)
               </motion.div>
             )}
           </div>
-
-          {/* Variant watermark (Kuhn — no community cards) */}
-          {variant === 'kuhn' && (
-            <div className="text-text-tertiary/20 font-display text-3xl font-bold uppercase tracking-wider select-none">
-              KUHN
-            </div>
-          )}
         </div>
 
         {/* Bottom player (player index 0) — pinned to bottom */}

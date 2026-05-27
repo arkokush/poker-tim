@@ -166,6 +166,8 @@ interface HoldemExtra {
 
 const extraState = new Map<number, HoldemExtra>()
 let globalRng: () => number = Math.random
+let configSmallBlind = 1
+let configBigBlind = 2
 
 const STREET_ORDER: Street[] = ['preflop', 'flop', 'turn', 'river']
 
@@ -187,6 +189,8 @@ export const limitHoldemEngine: GameEngine = {
     } else {
       globalRng = mulberry32(Date.now())
     }
+    configSmallBlind = config.smallBlind
+    configBigBlind = config.bigBlind
 
     const gamePlayers: Player[] = players.map(p => ({
       ...p,
@@ -217,18 +221,14 @@ export const limitHoldemEngine: GameEngine = {
 
   dealNewHand(state: GameState): GameState {
     const deck = shuffle(buildDeck(), globalRng)
+    const smallBlind = configSmallBlind
+    const bigBlind = configBigBlind
     const extra: HoldemExtra = {
       deck,
       betsThisRound: 0,
-      smallBlind: 1, // will be overwritten
-      bigBlind: 1,
+      smallBlind,
+      bigBlind,
     }
-
-    // Determine blinds from currentBetSize or default
-    const bigBlind = state.currentBetSize || 2
-    const smallBlind = bigBlind / 2
-    extra.smallBlind = smallBlind
-    extra.bigBlind = bigBlind
 
     const handNumber = state.handNumber + 1
     extraState.set(handNumber, extra)
