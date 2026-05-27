@@ -51,8 +51,10 @@ export const Seat = memo(function Seat({ player, isActive, isWinner, showCards, 
 
   return (
     <div className={`flex flex-col items-center gap-2 ${position === 'top' ? 'flex-col' : 'flex-col-reverse'} ${dimmed}`}>
-      {/* Action label */}
-      <ActionLabel action={displayAction?.text ?? null} color={displayAction?.color ?? 'green'} />
+      {/* Action label — fixed height to prevent layout shift */}
+      <div className="min-h-[28px] flex items-center justify-center">
+        <ActionLabel action={displayAction?.text ?? null} color={displayAction?.color ?? 'green'} />
+      </div>
 
       {/* Cards */}
       <div className="flex gap-1.5">
@@ -99,13 +101,15 @@ export const Seat = memo(function Seat({ player, isActive, isWinner, showCards, 
         </div>
       </div>
 
-      {/* Current bet */}
-      {player.currentBet > 0 && (
-        <ChipStack
-          amount={player.currentBet}
-          color={isActive ? 'purple' : 'neutral'}
-        />
-      )}
+      {/* Current bet — fixed height to prevent layout shift */}
+      <div className="min-h-[32px] flex items-center justify-center">
+        {player.currentBet > 0 && (
+          <ChipStack
+            amount={player.currentBet}
+            color={isActive ? 'purple' : 'neutral'}
+          />
+        )}
+      </div>
     </div>
   )
 })

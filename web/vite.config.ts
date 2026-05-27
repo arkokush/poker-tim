@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/PokerBot/',
+  base: '/poker-tim/',
   build: {
     outDir: '../docs',
     emptyOutDir: true,

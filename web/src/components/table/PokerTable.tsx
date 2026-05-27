@@ -54,21 +54,23 @@ export function PokerTable({ state, lastActions, mode, pvpActivePlayer }: Props)
       </div>
 
       {/* Table content */}
-      <div className="relative z-10 flex flex-col items-center gap-4 w-full max-w-lg py-6">
-        {/* Top player (player index 1) */}
-        {players[1] && (
-          <Seat
-            player={players[1]}
-            isActive={currentPlayerIndex === 1 && !state.isHandOver}
-            isWinner={winner === 1}
-            showCards={shouldShowCards(1)}
-            position="top"
-            lastAction={lastActions[1]}
-          />
-        )}
+      <div className="relative z-10 flex flex-col items-center justify-between h-full w-full max-w-lg py-6">
+        {/* Top player (player index 1) — pinned to top */}
+        <div className="shrink-0">
+          {players[1] && (
+            <Seat
+              player={players[1]}
+              isActive={currentPlayerIndex === 1 && !state.isHandOver}
+              isWinner={winner === 1}
+              showCards={shouldShowCards(1)}
+              position="top"
+              lastAction={lastActions[1]}
+            />
+          )}
+        </div>
 
-        {/* Community cards + pot */}
-        <div className="flex flex-col items-center gap-2.5 py-2">
+        {/* Community cards + pot — centered */}
+        <div className="flex flex-col items-center justify-center gap-2.5 py-2">
           {/* Street label */}
           {showStreetLabel && (
             <motion.div
@@ -97,17 +99,19 @@ export function PokerTable({ state, lastActions, mode, pvpActivePlayer }: Props)
           )}
 
           {/* Pot */}
-          {pot > 0 && (
-            <motion.div
-              className="flex items-center gap-2"
-              key={pot}
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChipStack amount={pot} color="purple" animate={false} />
-            </motion.div>
-          )}
+          <div className="min-h-[32px] flex items-center justify-center">
+            {pot > 0 && (
+              <motion.div
+                className="flex items-center gap-2"
+                key={pot}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChipStack amount={pot} color="purple" animate={false} />
+              </motion.div>
+            )}
+          </div>
 
           {/* Variant watermark (Kuhn — no community cards) */}
           {variant === 'kuhn' && (
@@ -117,17 +121,19 @@ export function PokerTable({ state, lastActions, mode, pvpActivePlayer }: Props)
           )}
         </div>
 
-        {/* Bottom player (player index 0) */}
-        {players[0] && (
-          <Seat
-            player={players[0]}
-            isActive={currentPlayerIndex === 0 && !state.isHandOver}
-            isWinner={winner === 0}
-            showCards={shouldShowCards(0)}
-            position="bottom"
-            lastAction={lastActions[0]}
-          />
-        )}
+        {/* Bottom player (player index 0) — pinned to bottom */}
+        <div className="shrink-0">
+          {players[0] && (
+            <Seat
+              player={players[0]}
+              isActive={currentPlayerIndex === 0 && !state.isHandOver}
+              isWinner={winner === 0}
+              showCards={shouldShowCards(0)}
+              position="bottom"
+              lastAction={lastActions[0]}
+            />
+          )}
+        </div>
       </div>
 
       {/* Dealer button */}
