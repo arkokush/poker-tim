@@ -177,7 +177,6 @@ function nextStreet(s: Street): Street | null {
 }
 
 function betSizeForStreet(street: Street, bigBlind: number): number {
-  // Small bet on preflop+flop, big bet on turn+river
   if (street === 'preflop' || street === 'flop') return bigBlind
   return bigBlind * 2
 }
@@ -233,8 +232,8 @@ export const limitHoldemEngine: GameEngine = {
     const handNumber = state.handNumber + 1
     extraState.set(handNumber, extra)
 
-    // For heads-up: dealer/SB = index 0, BB = index 1
-    const dealerIdx = state.dealerIndex
+    // For heads-up: dealer/SB rotates each hand
+    const dealerIdx = 1 - state.dealerIndex
     const sbIdx = dealerIdx
     const bbIdx = 1 - dealerIdx
 
@@ -266,7 +265,7 @@ export const limitHoldemEngine: GameEngine = {
       actionHistory: [],
       betToCall: bigBlind - smallBlind,
       currentBetSize: bigBlind,
-      dealerIndex: state.dealerIndex,
+      dealerIndex: dealerIdx,
       validActions: getActionsForState(bigBlind - smallBlind, 1),
     }
 
