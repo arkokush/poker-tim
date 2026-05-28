@@ -160,14 +160,10 @@ function evaluate5(cards: Card[]): HandScore {
 interface HoldemExtra {
   deck: Card[]
   betsThisRound: number
-  smallBlind: number
-  bigBlind: number
 }
 
 const extraState = new Map<number, HoldemExtra>()
 let globalRng: () => number = Math.random
-let configSmallBlind = 1
-let configBigBlind = 2
 
 const STREET_ORDER: Street[] = ['preflop', 'flop', 'turn', 'river']
 
@@ -188,8 +184,6 @@ export const limitHoldemEngine: GameEngine = {
     } else {
       globalRng = mulberry32(Date.now())
     }
-    configSmallBlind = config.smallBlind
-    configBigBlind = config.bigBlind
 
     const gamePlayers: Player[] = players.map(p => ({
       ...p,
@@ -215,18 +209,17 @@ export const limitHoldemEngine: GameEngine = {
       validActions: [],
       betToCall: 0,
       currentBetSize: config.bigBlind,
+      smallBlind: config.smallBlind,
+      bigBlind: config.bigBlind,
     }
   },
 
   dealNewHand(state: GameState): GameState {
     const deck = shuffle(buildDeck(), globalRng)
-    const smallBlind = configSmallBlind
-    const bigBlind = configBigBlind
+    const { smallBlind, bigBlind } = state
     const extra: HoldemExtra = {
       deck,
       betsThisRound: 0,
-      smallBlind,
-      bigBlind,
     }
 
     const handNumber = state.handNumber + 1
@@ -336,7 +329,7 @@ export const limitHoldemEngine: GameEngine = {
     }
 
     if (action.type === 'bet') {
-      const betAmt = betSizeForStreet(newState.street, extra.bigBlind)
+      const betAmt = betSizeForStreet(newState.street, newState.bigBlind)
       currentPlayer.stack -= betAmt
       currentPlayer.currentBet += betAmt
       newState.pot += betAmt
@@ -348,7 +341,7 @@ export const limitHoldemEngine: GameEngine = {
     }
 
     if (action.type === 'raise') {
-      const raiseSize = betSizeForStreet(newState.street, extra.bigBlind)
+      const raiseSize = betSizeForStreet(newState.street, newState.bigBlind)
       const totalCost = newState.betToCall + raiseSize
       currentPlayer.stack -= totalCost
       currentPlayer.currentBet += totalCost
@@ -365,7 +358,7 @@ export const limitHoldemEngine: GameEngine = {
 
   getValidActions(state: GameState): { actions: Action[]; betSize: number; callAmount: number } {
     const extra = extraState.get(state.handNumber)
-    const betSize = extra ? betSizeForStreet(state.street, extra.bigBlind) : state.currentBetSize
+    const betSize = extra ? betSizeForStreet(state.street, state.bigBlind) : state.currentBetSize
     return {
       actions: state.validActions,
       betSize,
@@ -395,11 +388,11 @@ function advanceStreet(state: GameState, extra: HoldemExtra): GameState {
 
   const next = nextStreet(state.street)
   if (next === null) {
-    return resolveShowdown(state, extra)
+    return resolveShowdown(state)
   }
 
   state.street = next
-  state.currentBetSize = betSizeForStreet(next, extra.bigBlind)
+  state.currentBetSize = betSizeForStreet(next, state.bigBlind)
 
   // Deal community cards
   const deckStart = 4 // first 4 cards are hole cards
@@ -417,7 +410,7 @@ function advanceStreet(state: GameState, extra: HoldemExtra): GameState {
   return state
 }
 
-function resolveShowdown(state: GameState, _extra: HoldemExtra): GameState {
+function resolveShowdown(state: GameState): GameState {
   const p0 = state.players[0]
   const p1 = state.players[1]
 

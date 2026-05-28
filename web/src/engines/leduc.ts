@@ -72,6 +72,8 @@ export const leducEngine: GameEngine = {
       validActions: [],
       betToCall: 0,
       currentBetSize: 2,
+      smallBlind: 1,
+      bigBlind: 2,
     }
   },
 
@@ -107,6 +109,7 @@ export const leducEngine: GameEngine = {
       betToCall: 0,
       currentBetSize: 2,
       validActions: ['check', 'bet'],
+      dealerIndex: 1 - state.dealerIndex,
     }
 
     return newState

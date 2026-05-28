@@ -46,6 +46,8 @@ export interface GameState {
   validActions: Action[]
   betToCall: number
   currentBetSize: number
+  smallBlind: number
+  bigBlind: number
 }
 
 export interface GameConfig {

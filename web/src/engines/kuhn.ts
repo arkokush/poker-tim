@@ -61,6 +61,8 @@ export const kuhnEngine: GameEngine = {
       validActions: [],
       betToCall: 0,
       currentBetSize: 1,
+      smallBlind: 1,
+      bigBlind: 1,
     }
   },
 
@@ -89,6 +91,7 @@ export const kuhnEngine: GameEngine = {
       betToCall: 0,
       currentBetSize: 1,
       validActions: ['check', 'bet'],
+      dealerIndex: 1 - state.dealerIndex,
     }
 
     return newState
