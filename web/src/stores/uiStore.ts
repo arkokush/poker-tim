@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type { GameVariant, PlayMode } from '../engines/types'
 
+document.documentElement.classList.add('light')
+
 interface UIState {
   selectedVariant: GameVariant | null
   selectedMode: PlayMode | null
@@ -27,7 +29,7 @@ export const useUIStore = create<UIState>((set) => ({
   soundEnabled: true,
   animationSpeed: 1,
   isPaused: false,
-  lightMode: false,
+  lightMode: true,
   pvpWaitingForPass: false,
   pvpActivePlayer: 0,
 
